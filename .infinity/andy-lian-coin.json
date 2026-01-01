@@ -1,0 +1,69 @@
+{
+  "name": "Andy Lian Coin",
+  "symbol": "💰ALC",
+  "purpose": "Proof of active users and transactions",
+  "minted_by": "user_contributions",
+  "earned_by": [
+    "creating_content",
+    "building_features",
+    "helping_others",
+    "completing_tasks"
+  ],
+  "spent_on": [
+    "premium_features",
+    "art_commissions",
+    "priority_processing",
+    "unlocking_themes"
+  ],
+  "proves": "Real users building real value",
+  "shuts_up": "Andy Lian and doubters",
+  "initial_supply": 0,
+  "max_supply": null,
+  "decimals": 2,
+  "exchange_rate": {
+    "usd_base": 0.01,
+    "dynamic_pricing": true,
+    "activity_multiplier": 1.5
+  },
+  "minting_rules": {
+    "content_creation": {
+      "reward": 10,
+      "description": "Create meaningful content"
+    },
+    "feature_building": {
+      "reward": 50,
+      "description": "Build new features"
+    },
+    "helping_others": {
+      "reward": 5,
+      "description": "Help other users"
+    },
+    "task_completion": {
+      "reward": 20,
+      "description": "Complete assigned tasks"
+    }
+  },
+  "spending_options": {
+    "premium_features": {
+      "cost": 100,
+      "description": "Unlock premium features"
+    },
+    "art_commissions": {
+      "cost": 500,
+      "description": "Commission custom artwork"
+    },
+    "priority_processing": {
+      "cost": 25,
+      "description": "Priority queue processing"
+    },
+    "theme_unlock": {
+      "cost": 150,
+      "description": "Unlock special themes"
+    }
+  },
+  "metadata": {
+    "created": "2026-01-01T10:26:13Z",
+    "version": "1.0.0",
+    "machine_identity": "TOKEN_HUB"
+  }
+}
