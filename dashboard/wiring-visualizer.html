@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧲 Hydrogen Bond Visualizer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #00ff00;
+      overflow: hidden;
+    }
+    
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border-bottom: 2px solid #00ff00;
+      text-align: center;
+    }
+    
+    .title {
+      font-size: 2em;
+      text-shadow: 0 0 10px #00ff00;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #00aaff;
+      font-size: 1em;
+    }
+    
+    #canvas {
+      flex: 1;
+      background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+    }
+    
+    .info-panel {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 15px;
+      min-width: 250px;
+      max-width: 300px;
+    }
+    
+    .info-title {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #00ff00;
+      border-bottom: 1px solid #00ff00;
+      padding-bottom: 5px;
+    }
+    
+    .info-item {
+      margin: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9em;
+    }
+    
+    .info-label {
+      color: #00aaff;
+    }
+    
+    .info-value {
+      color: #00ff00;
+      font-weight: bold;
+    }
+    
+    .legend {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    
+    .legend-title {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      color: #00ff00;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 2px solid currentColor;
+    }
+    
+    .controls {
+      position: fixed;
+      top: 100px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    
+    .control-button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(0, 100, 0, 0.5);
+      border: 1px solid #00ff00;
+      border-radius: 4px;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .control-button:hover {
+      background: rgba(0, 150, 0, 0.8);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes flow {
+      0% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: 20; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">🧲 HYDROGEN BOND VISUALIZER</div>
+      <div class="subtitle">Real-time Website-to-Website Wiring Network</div>
+    </div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <div class="info-panel">
+      <div class="info-title">Network Status</div>
+      <div class="info-item">
+        <span class="info-label">Active Bonds:</span>
+        <span class="info-value" id="activeBonds">5</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Total Strength:</span>
+        <span class="info-value" id="totalStrength">25</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Capacitance:</span>
+        <span class="info-value" id="capacitance">2500 ALC</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Avg Resistance:</span>
+        <span class="info-value" id="resistance">2.5 Ω</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Transmissions:</span>
+        <span class="info-value" id="transmissions">0</span>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="control-button" onclick="sendTransaction()">📤 Send TX</button>
+      <button class="control-button" onclick="broadcast()">📡 Broadcast</button>
+      <button class="control-button" onclick="strengthenBonds()">⚡ Strengthen</button>
+      <button class="control-button" onclick="repairBonds()">🔧 Repair</button>
+    </div>
+    
+    <div class="legend">
+      <div class="legend-title">Bond Types</div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #00ff00; border-color: #00ff00;"></div>
+        <span>Strong Bond</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ffaa00; border-color: #ffaa00;"></div>
+        <span>Medium Bond</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ffff00; border-color: #ffff00;"></div>
+        <span>Weak Bond</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width, height, centerX, centerY;
+    let transmissionCount = 0;
+    let particles = [];
+    
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      centerX = width / 2;
+      centerY = height / 2;
+    }
+    
+    resize();
+    window.addEventListener('resize', resize);
+    
+    // Hub and connected nodes
+    const hub = {
+      x: centerX,
+      y: centerY,
+      radius: 40,
+      label: 'DASH HUB',
+      color: '#00ff00'
+    };
+    
+    const nodes = [
+      { angle: 0, distance: 250, radius: 30, label: 'Banksy', color: '#ff69b4', bondStrength: 'medium' },
+      { angle: Math.PI / 3, distance: 250, radius: 30, label: 'Token-Mint', color: '#ffd700', bondStrength: 'strong' },
+      { angle: 2 * Math.PI / 3, distance: 250, radius: 30, label: 'Pricing', color: '#00aaff', bondStrength: 'strong' },
+      { angle: Math.PI, distance: 250, radius: 30, label: 'Commerce', color: '#ff6600', bondStrength: 'strong' },
+      { angle: 4 * Math.PI / 3, distance: 250, radius: 30, label: 'Index', color: '#9933ff', bondStrength: 'medium' },
+      { angle: 5 * Math.PI / 3, distance: 250, radius: 30, label: 'Mongoose', color: '#33ff99', bondStrength: 'weak' }
+    ];
+    
+    // Calculate node positions
+    nodes.forEach(node => {
+      node.x = centerX + Math.cos(node.angle) * node.distance;
+      node.y = centerY + Math.sin(node.angle) * node.distance;
+    });
+    
+    // Particle class for animations
+    class Particle {
+      constructor(startX, startY, endX, endY, color) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
+        this.x = startX;
+        this.y = startY;
+        this.color = color;
+        this.progress = 0;
+        this.speed = 0.02;
+        this.radius = 4;
+      }
+      
+      update() {
+        this.progress += this.speed;
+        this.x = this.startX + (this.endX - this.startX) * this.progress;
+        this.y = this.startY + (this.endY - this.startY) * this.progress;
+        return this.progress < 1;
+      }
+      
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+    
+    function getBondColor(strength) {
+      switch(strength) {
+        case 'strong': return '#00ff00';
+        case 'medium': return '#ffaa00';
+        case 'weak': return '#ffff00';
+        default: return '#00ff00';
+      }
+    }
+    
+    function drawBond(x1, y1, x2, y2, strength, animated = false) {
+      const color = getBondColor(strength);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = strength === 'strong' ? 3 : strength === 'medium' ? 2 : 1;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = color;
+      
+      if (animated) {
+        ctx.setLineDash([5, 5]);
+        ctx.lineDashOffset = (Date.now() / 50) % 20;
+      } else {
+        ctx.setLineDash([]);
+      }
+      
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      
+      ctx.shadowBlur = 0;
+      ctx.setLineDash([]);
+    }
+    
+    function drawNode(node) {
+      // Node circle
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fill();
+      ctx.strokeStyle = node.color;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = node.color;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      // Node label
+      ctx.fillStyle = node.color;
+      ctx.font = '12px Courier New';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.label, node.x, node.y);
+    }
+    
+    function animate() {
+      // Clear canvas
+      ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Draw bonds
+      nodes.forEach(node => {
+        drawBond(hub.x, hub.y, node.x, node.y, node.bondStrength, true);
+      });
+      
+      // Draw hub
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, hub.radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+      ctx.fill();
+      ctx.strokeStyle = hub.color;
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = hub.color;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      // Hub label
+      ctx.fillStyle = hub.color;
+      ctx.font = 'bold 14px Courier New';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(hub.label, hub.x, hub.y);
+      
+      // Draw nodes
+      nodes.forEach(drawNode);
+      
+      // Update and draw particles
+      particles = particles.filter(particle => {
+        const alive = particle.update();
+        if (alive) {
+          particle.draw();
+        }
+        return alive;
+      });
+      
+      requestAnimationFrame(animate);
+    }
+    
+    function sendTransaction() {
+      const targetNode = nodes[Math.floor(Math.random() * nodes.length)];
+      const particle = new Particle(hub.x, hub.y, targetNode.x, targetNode.y, targetNode.color);
+      particles.push(particle);
+      
+      transmissionCount++;
+      document.getElementById('transmissions').textContent = transmissionCount;
+      
+      // Send back response
+      setTimeout(() => {
+        const responseParticle = new Particle(targetNode.x, targetNode.y, hub.x, hub.y, hub.color);
+        particles.push(responseParticle);
+      }, 1000);
+    }
+    
+    function broadcast() {
+      nodes.forEach((node, index) => {
+        setTimeout(() => {
+          const particle = new Particle(hub.x, hub.y, node.x, node.y, node.color);
+          particles.push(particle);
+          transmissionCount++;
+          document.getElementById('transmissions').textContent = transmissionCount;
+        }, index * 100);
+      });
+    }
+    
+    function strengthenBonds() {
+      nodes.forEach(node => {
+        if (node.bondStrength === 'weak') {
+          node.bondStrength = 'medium';
+        } else if (node.bondStrength === 'medium') {
+          node.bondStrength = 'strong';
+        }
+      });
+      
+      // Update stats
+      const totalStrength = nodes.reduce((sum, node) => {
+        const values = { weak: 1, medium: 5, strong: 10 };
+        return sum + values[node.bondStrength];
+      }, 0);
+      document.getElementById('totalStrength').textContent = totalStrength;
+    }
+    
+    function repairBonds() {
+      // Visual effect
+      nodes.forEach((node, index) => {
+        setTimeout(() => {
+          for (let i = 0; i < 5; i++) {
+            const angle = (Math.PI * 2 / 5) * i;
+            const distance = 50;
+            const x = node.x + Math.cos(angle) * distance;
+            const y = node.y + Math.sin(angle) * distance;
+            const particle = new Particle(x, y, node.x, node.y, node.color);
+            particle.speed = 0.05;
+            particles.push(particle);
+          }
+        }, index * 100);
+      });
+    }
+    
+    // Auto-send transactions
+    setInterval(() => {
+      if (Math.random() < 0.3) {
+        sendTransaction();
+      }
+    }, 3000);
+    
+    // Start animation
+    animate();
+  </script>
+</body>
+</html>
